@@ -1,0 +1,111 @@
+services:
+
+  postgres_local:
+    image: postgres:15-alpine
+    container_name: autoatendimento-postgres
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: autoatendimento
+
+    ports:
+      - 5432:5432
+
+    volumes:
+      - postgres_local_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d autoatendimento"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - autoatendimento_network
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: autoatendimento-redis
+
+    ports:
+      - "6379:6379"
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - autoatendimento_network
+
+
+  backend:
+  image: wellinton07/autoatendimento-backend:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+
+    networks:
+      - autoatendimento_network
+
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.backend
+
+    container_name: autoatendimento-backend
+
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres_local:5432/autoatendimento
+      REDIS_URL: redis://redis:6379/0
+      DEBUG: "true"
+      LOG_LEVEL: "info"
+
+    ports:
+      - "5001:5001"
+
+    depends_on:
+      postgres_local:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    volumes:
+      - ./backend:/app
+
+    command: python app/main.py
+
+    restart: unless-stopped
+
+
+  frontend:
+    image: wellinton07/autoatendimento-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+
+    container_name: autoatendimento-frontend
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - backend
+
+    networks:
+      - autoatendimento_network
+
+    restart: unless-stopped
+
+
+volumes:
+  postgres_local_data:
+
+networks:
+  autoatendimento_network:
+    driver: bridge
