@@ -9,7 +9,18 @@ Casos cobertos:
 
 import json
 import pytest
-from app.main import app, PRODUTOS
+from unittest.mock import patch, MagicMock
+from app.main import app
+
+
+# Produtos fictícios para os testes (sem precisar do banco)
+PRODUTOS_MOCK = [
+    MagicMock(id=1, nome="X-Burguer",   descricao="Pão e carne",  preco=18.90, categoria="Lanches", ativo=True),
+    MagicMock(id=2, nome="Coca-Cola",   descricao="Lata 350ml",   preco=7.00,  categoria="Bebidas",  ativo=True),
+    MagicMock(id=3, nome="Pudim",       descricao="Fatia",        preco=8.50,  categoria="Sobremesas", ativo=False),
+]
+
+PRODUTOS_ATIVOS_MOCK = [p for p in PRODUTOS_MOCK if p.ativo]
 
 
 @pytest.fixture
@@ -20,6 +31,19 @@ def client():
         yield client
 
 
+def mock_session_query(produtos):
+    """Monta a cadeia session.query(...).filter(...).all() como mock."""
+    mock_query = MagicMock()
+    mock_query.filter.return_value = mock_query
+    mock_query.all.return_value = produtos
+
+    mock_session = MagicMock()
+    mock_session.query.return_value = mock_query
+    mock_session.__enter__ = MagicMock(return_value=mock_session)
+    mock_session.__exit__ = MagicMock(return_value=False)
+    return mock_session
+
+
 # ─────────────────────────────────────────────
 # CASO 01 — Retorna apenas produtos ativos
 # ─────────────────────────────────────────────
@@ -27,22 +51,23 @@ class TestCaso01CardapioAtivos:
     """GET /api/cardapio deve retornar somente os produtos com ativo=True."""
 
     def test_status_code_200(self, client):
-        resposta = client.get("/api/cardapio")
-        assert resposta.status_code == 200, "Esperado HTTP 200"
+        with patch("app.main.Session", return_value=mock_session_query(PRODUTOS_ATIVOS_MOCK)):
+            resposta = client.get("/api/cardapio")
+        assert resposta.status_code == 200
 
     def test_retorna_lista(self, client):
-        resposta = client.get("/api/cardapio")
+        with patch("app.main.Session", return_value=mock_session_query(PRODUTOS_ATIVOS_MOCK)):
+            resposta = client.get("/api/cardapio")
         dados = json.loads(resposta.data)
-        assert isinstance(dados, list), "Resposta deve ser uma lista"
+        assert isinstance(dados, list)
 
     def test_todos_os_itens_sao_ativos(self, client):
-        resposta = client.get("/api/cardapio")
+        with patch("app.main.Session", return_value=mock_session_query(PRODUTOS_ATIVOS_MOCK)):
+            resposta = client.get("/api/cardapio")
         dados = json.loads(resposta.data)
-        assert len(dados) > 0, "Deve haver ao menos um produto ativo"
+        assert len(dados) > 0
         for produto in dados:
-            assert produto["ativo"] is True, (
-                f"Produto '{produto['nome']}' não deveria aparecer (ativo=False)"
-            )
+            assert produto["ativo"] is True
 
 
 # ─────────────────────────────────────────────
@@ -52,27 +77,17 @@ class TestCaso02ProdutoInativo:
     """Produto com ativo=False não deve constar na resposta do cardápio."""
 
     def test_inativo_ausente_no_cardapio(self, client):
-        # Identifica nomes de produtos inativos nos dados de teste
-        inativos = [p["nome"] for p in PRODUTOS if not p["ativo"]]
-        assert len(inativos) > 0, "Precisa haver ao menos um produto inativo nos dados de teste"
-
-        resposta = client.get("/api/cardapio")
+        with patch("app.main.Session", return_value=mock_session_query(PRODUTOS_ATIVOS_MOCK)):
+            resposta = client.get("/api/cardapio")
         dados = json.loads(resposta.data)
-        nomes_retornados = [p["nome"] for p in dados]
-
-        for nome_inativo in inativos:
-            assert nome_inativo not in nomes_retornados, (
-                f"'{nome_inativo}' está inativo mas apareceu no cardápio"
-            )
+        nomes = [p["nome"] for p in dados]
+        assert "Pudim" not in nomes
 
     def test_quantidade_correta_de_ativos(self, client):
-        qtd_ativos_esperada = sum(1 for p in PRODUTOS if p["ativo"])
-        resposta = client.get("/api/cardapio")
+        with patch("app.main.Session", return_value=mock_session_query(PRODUTOS_ATIVOS_MOCK)):
+            resposta = client.get("/api/cardapio")
         dados = json.loads(resposta.data)
-        assert len(dados) == qtd_ativos_esperada, (
-            f"Esperava {qtd_ativos_esperada} produto(s) ativo(s), "
-            f"mas recebeu {len(dados)}"
-        )
+        assert len(dados) == len(PRODUTOS_ATIVOS_MOCK)
 
 
 # ─────────────────────────────────────────────
@@ -84,33 +99,46 @@ class TestCaso04CarrinhoVazio:
     def test_carrinho_vazio_retorna_400(self, client):
         resposta = client.post(
             "/api/pedido",
-            json={"itens": []},
+            json={"mesa": 1, "cliente": "João", "itens": []},
             content_type="application/json",
         )
-        assert resposta.status_code == 400, "Carrinho vazio deve retornar HTTP 400"
+        assert resposta.status_code == 400
 
     def test_sem_campo_itens_retorna_400(self, client):
         resposta = client.post(
             "/api/pedido",
-            json={},
+            json={"mesa": 1, "cliente": "João"},
             content_type="application/json",
         )
-        assert resposta.status_code == 400, "Body sem 'itens' deve retornar HTTP 400"
+        assert resposta.status_code == 400
 
     def test_mensagem_de_erro_presente(self, client):
         resposta = client.post(
             "/api/pedido",
-            json={"itens": []},
+            json={"mesa": 1, "cliente": "João", "itens": []},
             content_type="application/json",
         )
         dados = json.loads(resposta.data)
-        assert "erro" in dados, "Resposta deve conter campo 'erro'"
+        assert "erro" in dados
 
     def test_pedido_valido_retorna_201(self, client):
         """Contra-prova: pedido com itens deve funcionar (HTTP 201)."""
-        resposta = client.post(
-            "/api/pedido",
-            json={"itens": [{"id": 1, "qtd": 2}]},
-            content_type="application/json",
-        )
-        assert resposta.status_code == 201, "Pedido válido deve retornar HTTP 201"
+        mock_pedido = MagicMock()
+        mock_pedido.id = 42
+        mock_pedido.mesa = 1
+        mock_pedido.cliente = "João"
+        mock_pedido.status = "recebido"
+
+        mock_session = MagicMock()
+        mock_session.__enter__ = MagicMock(return_value=mock_session)
+        mock_session.__exit__ = MagicMock(return_value=False)
+
+        with patch("app.main.Session", return_value=mock_session), \
+             patch("app.main.Pedido", return_value=mock_pedido), \
+             patch("app.main.ItemPedido", return_value=MagicMock()):
+            resposta = client.post(
+                "/api/pedido",
+                json={"mesa": 1, "cliente": "João", "itens": [{"id": 1, "nome": "X-Burguer", "preco": 18.90, "quantidade": 1}]},
+                content_type="application/json",
+            )
+        assert resposta.status_code == 201

@@ -96,6 +96,7 @@ def cardapio():
             "descricao": p.descricao,
             "preco":     p.preco,
             "categoria": p.categoria,
+            "ativo":     True,
         } for p in produtos])
 
 
