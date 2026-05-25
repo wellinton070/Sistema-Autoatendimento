@@ -1,0 +1,11 @@
+[
+  "tests/test_unit.py::TestCaso01CardapioAtivos::test_retorna_lista",
+  "tests/test_unit.py::TestCaso01CardapioAtivos::test_status_code_200",
+  "tests/test_unit.py::TestCaso01CardapioAtivos::test_todos_os_itens_sao_ativos",
+  "tests/test_unit.py::TestCaso02ProdutoInativo::test_inativo_ausente_no_cardapio",
+  "tests/test_unit.py::TestCaso02ProdutoInativo::test_quantidade_correta_de_ativos",
+  "tests/test_unit.py::TestCaso04CarrinhoVazio::test_carrinho_vazio_retorna_400",
+  "tests/test_unit.py::TestCaso04CarrinhoVazio::test_mensagem_de_erro_presente",
+  "tests/test_unit.py::TestCaso04CarrinhoVazio::test_pedido_valido_retorna_201",
+  "tests/test_unit.py::TestCaso04CarrinhoVazio::test_sem_campo_itens_retorna_400"
+]

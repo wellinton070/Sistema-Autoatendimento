@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 .DS_Store
 postgres_local_data/
+backend/coverage_html/
+backend/.coverage

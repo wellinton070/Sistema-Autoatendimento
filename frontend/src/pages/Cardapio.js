@@ -4,7 +4,7 @@ function Cardapio() {
   const [dados, setDados] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5001")
+    fetch("http://18.217.66.10:5001")
       .then((res) => res.json())
       .then((data) => setDados(data))
       .catch((err) => console.error(err));
