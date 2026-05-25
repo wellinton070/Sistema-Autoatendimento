@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: autoatendimento
 
     ports:
-      - 5432:5432
+      - 5433:5432
 
     volumes:
       - postgres_local_data:/var/lib/postgresql/data
@@ -43,7 +43,7 @@ services:
 
 
   backend:
-  image: wellinton07/autoatendimento-backend:latest
+    image: wellinton07/autoatendimento-backend:latest
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
