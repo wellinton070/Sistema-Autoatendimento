@@ -1,0 +1,226 @@
+{
+  "v": 12,
+  "name": "Autoatendimento",
+  "folders": [],
+  "requests": [
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/",
+      "name": "Status da API",
+      "params": [],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 200\", () => {\n    pw.expect(pw.response.status).toBe(200);\n});",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    },
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/api/cardapio",
+      "name": "Lista cardapio",
+      "params": [],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 200\", () => {\n    pw.expect(pw.response.status).toBe(200);\n    pw.expect(pw.response.body).toBeType(\"array\");\n});",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    },
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/api/cardapio?categoria=Bebidas",
+      "name": "Cardapio filtrado por categoria",
+      "params": [],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 200\", () => {\n    pw.expect(pw.response.status).toBe(200);\n    pw.expect(pw.response.body).toBeType(\"array\");\n});",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    },
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/api/pedido",
+      "name": "Criar pedido",
+      "params": [],
+      "headers": [],
+      "method": "POST",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 201\", () => {\n    pw.expect(pw.response.status).toBe(201);\n    pw.expect(pw.response.body.status).toBe(\"recebido\");\n});",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"mesa\": 3,\n  \"cliente\": \"Welllinton\",\n  \"itens\": [\n    {\n      \"id\": 1,\n      \"nome\": \"X-Burguer\",\n      \"preco\": 18.90,\n      \"quantidade\": 2\n    },\n    {\n      \"id\": 5,\n      \"nome\": \"Coca-Cola\",\n      \"preco\": 7.00,\n      \"quantidade\": 1\n    }\n  ]\n}"
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    },
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/api/pedido",
+      "name": "Criar pedido - carrinho vazio",
+      "params": [],
+      "headers": [],
+      "method": "POST",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 400\", () => {\n    pw.expect(pw.response.status).toBe(400);\n});",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"mesa\": 3,\n  \"cliente\": \"Welllinton\",\n  \"itens\": []\n}"
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    },
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/api/pedido",
+      "name": "Criar pedido - sem mesa",
+      "params": [],
+      "headers": [],
+      "method": "POST",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 400\", () => {\n    pw.expect(pw.response.status).toBe(400);\n});",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"cliente\": \"Welllinton\",\n  \"itens\": [\n    {\n      \"id\": 1,\n      \"nome\": \"X-Burguer\",\n      \"preco\": 18.90,\n      \"quantidade\": 1\n    }\n  ]\n}"
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    },
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/api/pedidos",
+      "name": "Listar pedidos",
+      "params": [],
+      "headers": [],
+      "method": "GET",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 200\", () => {\n    pw.expect(pw.response.status).toBe(200);\n    pw.expect(pw.response.body).toBeType(\"array\");\n});",
+      "body": {
+        "contentType": null,
+        "body": null
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    },
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/api/pedido/1/status",
+      "name": "Atualizar status do pedido",
+      "params": [],
+      "headers": [],
+      "method": "PATCH",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 200\", () => {\n    pw.expect(pw.response.status).toBe(200);\n});",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"status\": \"preparando\"\n}"
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    },
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/api/pedido/1/status",
+      "name": "Atualizar status - status invalido",
+      "params": [],
+      "headers": [],
+      "method": "PATCH",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 400\", () => {\n    pw.expect(pw.response.status).toBe(400);\n});",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"status\": \"cancelado\"\n}"
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    },
+    {
+      "v": "17",
+      "endpoint": "http://localhost:5001/api/pedido/99999/status",
+      "name": "Atualizar status - pedido nao encontrado",
+      "params": [],
+      "headers": [],
+      "method": "PATCH",
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "preRequestScript": "",
+      "testScript": "pw.test(\"Status e 404\", () => {\n    pw.expect(pw.response.status).toBe(404);\n});",
+      "body": {
+        "contentType": "application/json",
+        "body": "{\n  \"status\": \"pronto\"\n}"
+      },
+      "requestVariables": [],
+      "responses": {},
+      "description": null
+    }
+  ],
+  "headers": [],
+  "auth": {
+    "authType": "none",
+    "authActive": true
+  },
+  "variables": [],
+  "description": "",
+  "preRequestScript": "",
+  "testScript": ""
+}
