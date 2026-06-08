@@ -11,6 +11,8 @@ jobs:
         working-directory: ./backend
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v2  
+      - run: pip install -r requirements.txt
       
       - name: Instalar dependências
         run: pip install pytest pytest-cov
