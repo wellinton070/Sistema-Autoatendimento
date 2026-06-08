@@ -1,4 +1,5 @@
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=wellinton070_Sistema-Autoatendimento&metric=alert_status)](https://sonarcloud.io/summary/overall?id=wellinton070_Sistema-Autoatendimento)
+[![CI](https://github.com/wellinton070/Sistema-Autoatendimento/actions/workflows/main.yml/badge.svg)](https://github.com/wellinton070/Sistema-Autoatendimento/actions/workflows/main.yml)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=wellinton070_Sistema-Autoatendimento&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=wellinton070_Sistema-Autoatendimento)
 
 #  Sistema de Autoatendimento — Panificadora/Lanchonete
 
